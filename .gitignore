@@ -1,0 +1,9 @@
+/.vscode
+/.idea
+/node_modules
+/lib
+.DS_Store
+kusamaVersions.json
+kusamaVersions.jsonl
+*.sql
+/builds

@@ -1,0 +1,291 @@
+type CollectionEntity @entity {
+  blockNumber: BigInt
+  burned: Boolean!
+  createdAt: DateTime!
+  currentOwner: String
+  distribution: Int!
+  events: [CollectionEvent!]
+  floor: BigInt!
+  hash: String! @unique
+  highestSale: BigInt!
+  id: ID!
+  image: String
+  issuer: String
+  lewd: Boolean!
+  max: Int!
+  media: String
+  meta: MetadataEntity
+  metadata: String
+  name: String @index
+  nftCount: Int!
+  nfts: [NFTEntity!] @derivedFrom(field: "collection")
+  ownerCount: Int!
+  supply: Int!
+  symbol: String!
+  updatedAt: DateTime!
+  version: String!
+  volume: BigInt!
+}
+
+type TokenEntity @entity {
+  id: ID!
+  blockNumber: BigInt
+  collection: CollectionEntity
+  nfts: [NFTEntity!] @derivedFrom(field: "token")
+  hash: String! @index
+  image: String
+  media: String
+  name: String @index
+  updatedAt: DateTime!
+  createdAt: DateTime!
+  count: Int!
+}
+
+type NFTEntity @entity {
+  blockNumber: BigInt
+  burned: Boolean!
+  collection: CollectionEntity!
+  createdAt: DateTime!
+  currentOwner: String @index # or address
+  emoteCount: Int!
+  emotes: [Emote!] @derivedFrom(field: "nft")
+  events: [Event!] @derivedFrom(field: "nft")
+  equipped: Part
+  hash: String! @index @unique
+  id: ID!
+  instance: String
+  image: String
+  issuer: String
+  lewd: Boolean!
+  media: String
+  meta: MetadataEntity
+  metadata: String
+  name: String @index
+  parent: NFTEntity # = nft_id
+  pending: Boolean!
+  price: BigInt!
+  properties: [Property!] @derivedFrom (field: "nft")
+  resources: [Resource!] @derivedFrom (field: "nft")
+  royalty: Float
+  recipient: String
+  sn: String
+  transferable: Int
+  updatedAt: DateTime!
+  version: String!
+  token: TokenEntity
+}
+
+type MetadataEntity @entity {
+  animationUrl: String
+  attributes: [Attribute!]
+  description: String
+  id: ID!
+  image: String
+  name: String
+  type: String
+}
+
+type Attribute @jsonField {
+  display: String
+  trait: String
+  value: String!
+}
+
+interface EventType {
+  id: ID!
+  blockNumber: BigInt
+  timestamp: DateTime!
+  caller: String!
+  currentOwner: String # currentOwner
+  interaction: Interaction!
+  version: String!
+  meta: String!
+}
+
+type Event implements EventType @entity {
+  id: ID!
+  blockNumber: BigInt
+  timestamp: DateTime!
+  caller: String!
+  currentOwner: String! # currentOwner
+  interaction: Interaction!
+  meta: String!
+  nft: NFTEntity!
+  version: String!
+}
+
+type CollectionEvent @jsonField {
+  blockNumber: String
+  timestamp: DateTime
+  caller: String!
+  interaction: String!
+  meta: String!
+}
+
+type BaseEvent @jsonField {
+  blockNumber: String
+  timestamp: DateTime
+  caller: String!
+  interaction: String!
+  meta: String!
+}
+
+type Emote @entity {
+  id: ID!
+  nft: NFTEntity!
+  caller: String!
+  value: String!
+  version: String!
+}
+
+# DEV: for RMRK v1 MINT use CREATE
+# DEV: for RMRK v1 MINTNFT use MINT
+enum Interaction {
+  ACCEPT
+  BASE
+  BURN
+  CREATE
+  DESTROY
+  MINT
+  LIST
+  BUY
+  SEND
+  CHANGEISSUER
+  EMOTE
+  SETPRIORITY
+  SETPROPERTY
+  THEMEADD
+  RESADD
+  EQUIP
+  EQUIPPABLE
+  LOCK
+  UNLIST
+  PAY_ROYALTY
+  ROYALTY
+  UNEQUIP
+}
+
+# Remarkably specific types
+type Base @entity {
+    id: ID!
+    type: BaseType!
+    symbol: String!
+    issuer: String!
+    currentOwner: String!  
+    meta: MetadataEntity
+    metadata: String
+    parts: [Part!] @derivedFrom(field: "base")
+    themes: [Theme!] @derivedFrom(field: "base")
+    # attachedToResources: [Resource!] @derivedFrom (field: "base")
+    events: [BaseEvent!]
+}
+
+type Part @entity {
+    id: ID! # baseId.partId base-12126274-SKBS.Eyebrows2white
+    name: String! # Eyebrows2white // RMRK calls it part_id
+    base: Base!
+    equippable: [String!]
+    metadata: String
+    meta: MetadataEntity
+    src: String
+    thumb: String # RMRK GraphQL does not have this
+    # resources: [ResourcePart!] @derivedFrom (field: "resource")
+    type: PartType!
+    z: Int
+}
+
+
+type Theme @entity {
+    id: ID!
+    name: String!
+    base: Base!
+    themeColor1: String
+    themeColor2: String
+    themeColor3: String
+    themeColor4: String
+}
+
+# https://github.com/rmrk-team/rmrk-spec/blob/master/standards/rmrk2.0.0/entities/nft.md#resources-and-resource
+type Resource @entity {
+    id: ID!
+    base: Base
+    src: String
+    meta: MetadataEntity
+    metadata: String
+    slot: Part
+    thumb: String
+    parts: [String!]
+    # parts: [ResourcePart!] @derivedFrom (field: "resource")
+    priority: Int! # 0 is highest priority, need to check if this is correct
+    pending: Boolean!
+    nft: NFTEntity!
+}
+
+enum BaseType {
+    svg
+    audio
+    mixed
+    video
+    png
+}
+
+enum PartType {
+    fixed
+    slot
+}
+
+type Property @entity {
+    id: ID! 
+    key: String!
+    value: String!
+    type: String!
+    mutable: Boolean!
+    nft: NFTEntity!
+}
+
+# Cachce and tables
+type Series @entity {
+  id: ID!
+  issuer: String,
+  unique: Int!
+  uniqueCollectors: Int!
+  sold: Int! @index
+  total: Int!
+  averagePrice: Float
+  floorPrice: BigInt
+  highestSale: BigInt
+  buys: Int
+  volume: BigInt
+  name: String! @index
+  metadata: String
+  image: String
+  emoteCount: Int
+}
+
+type Spotlight @entity {
+  id: ID!
+  collections: Int!
+  uniqueCollectors: Int!
+  unique: Int!
+  sold: Int! @index
+  total: Int!
+  average: Float
+  volume: BigInt
+}
+
+type Collector @entity {
+  id: ID!
+  name: String!
+  unique: Int!
+  uniqueCollectors: Int!
+  collections: Int!
+  total: Int!
+  average: Float
+  volume: BigInt @index
+  max: BigInt
+}
+
+type CacheStatus @entity {
+  id: ID!
+  lastBlockTimestamp: DateTime!
+}
