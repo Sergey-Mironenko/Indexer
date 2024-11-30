@@ -5,14 +5,24 @@ services:
     image: postgres:12
     restart: always
     volumes:
-      - /var/lib/postgresql/data
+      - ../data/indexer-db:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: indexer
+
+  redis:
+    image: redis:6.0-alpine
+    restart: always
+    volumes:
+      - redis-data:/data
 
   indexer:
     image: subsquid/hydra-indexer:4
     restart: unless-stopped
+    depends_on:
+      - db
+      - redis
     environment:
       - INDEXER_WORKERS=5
       - DB_NAME=indexer
@@ -21,41 +31,17 @@ services:
       - DB_PASS=postgres
       - DB_PORT=5432
       - REDIS_URI=redis://redis:6379/0
-      - BLOCK_HEIGHT=0 # starting block height
-      - WS_PROVIDER_ENDPOINT_URI=${CHAIN_NODE}
-
-    # # If your chain uses custom types you need to provide those
-    # # as detailed here - https://polkadot.js.org/docs/api/start/types.extend
-    # #
-    # # Json files below are passed verbatim to ApiPromise.create() from @polkadot/api.
-    # # Use any combination of those
-    #
-    #   - TYPES_JSON=types.json
-    #   - TYPES_ALIAS=typesAlias.json
-    #   - SPEC_TYPES=typesSpec.json
-    #   - CHAIN_TYPES=typesChain.json
-    #   - BUNDLE_TYPES=typesBundle.json
-    #
-    # volumes:
-    #   - ../types.json:/hydra/packages/hydra-indexer/types.json
-    #   - ../typesAlias.json:/hydra/packages/hydra-indexer/typesAlias.json
-    #   - ../typesSpec.json:/hydra/packages/hydra-indexer/typesSpec.json
-    #   - ../typesChain.json:/hydra/packages/hydra-indexer/typesChain.json
-    #   - ../typesBundle.json:/hydra/packages/hydra-indexer/typesBundle.json
-
-    depends_on:
-      - db
-      - redis
+      - BLOCK_HEIGHT=0
+      - WS_PROVIDER_ENDPOINT_URI=wss://kusama-asset-hub-rpc.polkadot.io
     command: >
-      sh -c "yarn db:bootstrap && yarn start:prod"
+      sh -c "yarn --cwd /app/indexer db:bootstrap && yarn --cwd /app/indexer start:prod"
+    volumes:
+      - ../:/app
 
   indexer-gateway:
     image: subsquid/hydra-indexer-gateway:4
     restart: unless-stopped
     depends_on:
-      - redis
-      - db
-      - indexer-status-service
       - indexer
     ports:
       - "8080:8080"
@@ -74,9 +60,9 @@ services:
     depends_on:
       - redis
     environment:
-      REDIS_URI: redis://redis:6379/0
-      PORT: 8081
+      - REDIS_URI=redis://redis:6379/0
+      - PORT=8081
 
-  redis:
-    image: redis:6.0-alpine
-    restart: always
+volumes:
+  redis-data:
+    driver: local

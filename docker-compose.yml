@@ -1,13 +1,114 @@
-version: "3"
+version: "3.8"
 
-#services:
-#  db:
-#   image: postgres:14
-#    environment:
-#      POSTGRES_DB: squid
-#      POSTGRES_PASSWORD: postgres
-#    ports:
-#      - "${DB_PORT}:5432"
-      # command: ["postgres", "-c", "log_statement=all"]
-#    volumes:
-#      - ./data/db:/var/lib/postgresql/data
+services:
+  # Архив
+  archive-db:
+    image: postgres:14
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: squid-archive
+    volumes:
+      - archive-db-data:/var/lib/postgresql/data
+
+  ingest:
+    depends_on:
+      - archive-db
+    image: subsquid/substrate-ingest:firesquid
+    restart: on-failure
+    command: [
+      "-e", "wss://kusama-asset-hub-rpc.polkadot.io",
+      "-e", "wss://kusama-rpc.dwellir.com",
+      "--out", "postgres://postgres:postgres@archive-db:5432/squid-archive"
+    ]
+
+  gateway:
+    depends_on:
+      - archive-db
+    image: subsquid/substrate-gateway:firesquid
+    environment:
+      DATABASE_MAX_CONNECTIONS: 5
+      RUST_LOG: "actix_web=info,actix_server=info"
+    command: [
+      "--database-url", "postgres://postgres:postgres@archive-db:5432/squid-archive"
+    ]
+    ports:
+      - "8888:8000"
+
+  explorer:
+    depends_on:
+      - archive-db
+    image: subsquid/substrate-explorer:firesquid
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: archive-db
+      DB_PORT: "5432"
+      DB_NAME: "squid-archive"
+      DB_USER: "postgres"
+      DB_PASS: "postgres"
+    ports:
+      - "4444:3000"
+
+  # Индексатор
+  indexer-db:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: indexer
+    volumes:
+      - indexer-db-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6.0-alpine
+    restart: always
+
+  indexer:
+    depends_on:
+      - indexer-db
+      - redis
+    image: subsquid/hydra-indexer:4
+    restart: unless-stopped
+    environment:
+      - INDEXER_WORKERS=5
+      - DB_NAME=indexer
+      - DB_HOST=indexer-db
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_PORT=5432
+      - REDIS_URI=redis://redis:6379/0
+      - WS_PROVIDER_ENDPOINT_URI=wss://kusama-asset-hub-rpc.polkadot.io
+    command: >
+      sh -c "yarn db:bootstrap && yarn start:prod"
+
+  indexer-gateway:
+    depends_on:
+      - indexer
+      - redis
+    image: subsquid/hydra-indexer-gateway:4
+    restart: unless-stopped
+    environment:
+      - DEV_MODE=true
+      - DB_NAME=indexer
+      - DB_HOST=indexer-db
+      - DB_USER=postgres
+      - DB_PASS=postgres
+      - DB_PORT=5432
+      - HYDRA_INDEXER_STATUS_SERVICE=http://indexer-status-service:8081/status
+    ports:
+      - "8080:8080"
+
+  indexer-status-service:
+    depends_on:
+      - redis
+    image: subsquid/hydra-indexer-status-service:4
+    restart: unless-stopped
+    environment:
+      REDIS_URI: redis://redis:6379/0
+      PORT: 8081
+
+volumes:
+  archive-db-data:
+  indexer-db-data:
