@@ -12,9 +12,13 @@ const ENDING_BLOCK = undefined; // 16261119;
 processor.setTypesBundle('kusama');
 // processor.setBlockRange({ from: 5756453 });
 processor.setBlockRange({ from: STARTING_BLOCK, to: ENDING_BLOCK });
+
+const archiveUrl = lookupArchive("kusama", { release: "FireSquid" });
+console.log("Archive URL:", archiveUrl);
+
 processor.setDataSource({
-    archive: lookupArchive("kusama", { release: "FireSquid" }),
-    chain: 'wss://polkadot-asset-hub-rpc.polkadot.io'
+    archive: `${archiveUrl}?ssl=true`,
+    chain: 'wss://kusama-rpc.polkadot.io',
 });
 
 processor.addCallHandler('System.remark', mappings.handleRemark);
