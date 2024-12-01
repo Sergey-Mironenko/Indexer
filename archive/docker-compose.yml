@@ -1,51 +1,36 @@
 version: "3.4"
 
 services:
-  db:
-    image: postgres:14
-    restart: always
-    volumes:
-      - ../data/archive-db:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: squid-archive
-
   ingest:
     image: subsquid/substrate-ingest:firesquid
     restart: on-failure
-    depends_on:
-      - db
     command: >
       ["-e", "wss://kusama-asset-hub-rpc.polkadot.io",
-       "--out", "postgres://postgres:postgres@db:5432/squid-archive"]
+       "--out", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=archive"]
     volumes:
       - ../:/app
 
   gateway:
     image: subsquid/substrate-gateway:firesquid
     restart: on-failure
-    depends_on:
-      - db
     environment:
       DATABASE_MAX_CONNECTIONS: 5
       RUST_LOG: "actix_web=info,actix_server=info"
     command: >
-      ["--database-url", "postgres://postgres:postgres@db:5432/squid-archive"]
+      ["--database-url", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=archive"]
     ports:
       - "8888:8000"
 
   explorer:
     image: subsquid/substrate-explorer:firesquid
     restart: on-failure
-    depends_on:
-      - db
     environment:
       DB_TYPE: postgres
-      DB_HOST: db
-      DB_PORT: "5432"
-      DB_NAME: "squid-archive"
-      DB_USER: "postgres"
-      DB_PASS: "postgres"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: "${DB_PORT}"
+      DB_NAME: "${DB_NAME}"
+      DB_USER: "${DB_USER}"
+      DB_PASS: "${DB_PASS}"
+      DB_SCHEMA: "archive"
     ports:
       - "4444:3000"

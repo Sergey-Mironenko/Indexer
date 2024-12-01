@@ -1,16 +1,6 @@
 version: "3.4"
 
 services:
-  db:
-    image: postgres:12
-    restart: always
-    volumes:
-      - ../data/indexer-db:/var/lib/postgresql/data
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: indexer
-
   redis:
     image: redis:6.0-alpine
     restart: always
@@ -20,19 +10,17 @@ services:
   indexer:
     image: subsquid/hydra-indexer:4
     restart: unless-stopped
-    depends_on:
-      - db
-      - redis
     environment:
-      - INDEXER_WORKERS=5
-      - DB_NAME=indexer
-      - DB_HOST=db
-      - DB_USER=postgres
-      - DB_PASS=postgres
-      - DB_PORT=5432
-      - REDIS_URI=redis://redis:6379/0
-      - BLOCK_HEIGHT=0
-      - WS_PROVIDER_ENDPOINT_URI=wss://kusama-asset-hub-rpc.polkadot.io
+      INDEXER_WORKERS: 5
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_PORT: ${DB_PORT}
+      REDIS_URI: ${REDIS_URI}
+      BLOCK_HEIGHT: 0
+      WS_PROVIDER_ENDPOINT_URI: wss://kusama-asset-hub-rpc.polkadot.io
+      DB_SCHEMA: "indexer"
     command: >
       sh -c "yarn --cwd /app/indexer db:bootstrap && yarn --cwd /app/indexer start:prod"
     volumes:
@@ -46,13 +34,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DEV_MODE=true
-      - DB_NAME=indexer
-      - DB_HOST=db
-      - DB_USER=postgres
-      - DB_PASS=postgres
-      - DB_PORT=5432
-      - HYDRA_INDEXER_STATUS_SERVICE=http://indexer-status-service:8081/status
+      DEV_MODE: true
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_PORT: ${DB_PORT}
+      DB_SCHEMA: "indexer"
+      HYDRA_INDEXER_STATUS_SERVICE: http://indexer-status-service:8081/status
 
   indexer-status-service:
     image: subsquid/hydra-indexer-status-service:4
@@ -60,8 +49,8 @@ services:
     depends_on:
       - redis
     environment:
-      - REDIS_URI=redis://redis:6379/0
-      - PORT=8081
+      REDIS_URI: ${REDIS_URI}
+      PORT: 8081
 
 volumes:
   redis-data:
