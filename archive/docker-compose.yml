@@ -6,7 +6,7 @@ services:
     restart: on-failure
     command: >
       ["-e", "wss://kusama-rpc.polkadot.ioo",
-       "--out", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=archive&ssl=true"]
+       "--out", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}]
     volumes:
       - ../:/app
 
@@ -17,7 +17,7 @@ services:
       DATABASE_MAX_CONNECTIONS: 5
       RUST_LOG: "actix_web=info,actix_server=info"
     command: >
-      ["--database-url", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=archive&ssl=true"]
+      ["--database-url", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}]
     ports:
       - "8888:8000"
 
