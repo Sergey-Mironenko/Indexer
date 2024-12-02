@@ -32,10 +32,12 @@ ENV PROCESSOR_PROMETHEUS_PORT 3000
 EXPOSE 3000
 EXPOSE 4000
 
-
+# Выполнение миграций для processor
 FROM squid AS processor
-CMD ["npm", "run", "processor:start"]
+RUN npx squid-typeorm-migration apply  # Применение миграций
+CMD ["npm", "run", "processor:start"]  # Запуск процессора
 
-
+# Выполнение миграций для query-node
 FROM squid AS query-node
-CMD ["npm", "run", "query-node:start"]
+RUN npx squid-typeorm-migration apply  # Применение миграций
+CMD ["npm", "run", "query-node:start"]  # Запуск GraphQL сервера
