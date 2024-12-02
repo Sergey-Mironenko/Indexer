@@ -9,7 +9,7 @@ services:
     image: subsquid/substrate-ingest:firesquid
     restart: on-failure
     command: [
-      "-e", "wss://kusama-asset-hub-rpc.polkadot.io",
+      "-e", "wss://kusama-rpc.polkadot.io",
       "-e", "wss://kusama-rpc.dwellir.com",
       "--out", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=archive&ssl=true"
     ]
@@ -50,7 +50,7 @@ services:
       DB_PORT: ${DB_PORT}
       REDIS_URI: ${REDIS_URI}
       BLOCK_HEIGHT: 0
-      WS_PROVIDER_ENDPOINT_URI: wss://kusama-asset-hub-rpc.polkadot.io
+      WS_PROVIDER_ENDPOINT_URI: wss://kusama-rpc.polkadot.io
       DB_SCHEMA: "indexer"
     command: >
       sh -c "yarn db:bootstrap && yarn start:prod"

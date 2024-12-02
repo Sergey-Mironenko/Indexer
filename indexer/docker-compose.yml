@@ -19,7 +19,7 @@ services:
       DB_PORT: ${DB_PORT}
       REDIS_URI: ${REDIS_URI}
       BLOCK_HEIGHT: 0
-      WS_PROVIDER_ENDPOINT_URI: wss://kusama-asset-hub-rpc.polkadot.io
+      WS_PROVIDER_ENDPOINT_URI: wss://kusama-rpc.polkadot.ioo
       DB_SCHEMA: "indexer"
     command: >
       sh -c "yarn --cwd /app/indexer db:bootstrap && yarn --cwd /app/indexer start:prod"

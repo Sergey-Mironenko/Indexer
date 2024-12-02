@@ -5,7 +5,7 @@ services:
     image: subsquid/substrate-ingest:firesquid
     restart: on-failure
     command: >
-      ["-e", "wss://kusama-asset-hub-rpc.polkadot.io",
+      ["-e", "wss://kusama-rpc.polkadot.ioo",
        "--out", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=archive&ssl=true"]
     volumes:
       - ../:/app
