@@ -9,10 +9,10 @@ const ormconfig = {
   dropSchema: false,
   logging: ["query", "error", "schema"],
   host: process.env.DB_HOST,
-  port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
-  database: process.env.DB_NAME || 'postgres',
-  username: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASS || 'postgres',
+  port: parseInt(process.env.DB_PORT),
+  database: process.env.DB_NAME,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
   ssl: { rejectUnauthorized: false },
 };
 
