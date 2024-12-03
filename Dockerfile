@@ -34,10 +34,10 @@ EXPOSE 4000
 
 # Выполнение миграций для processor
 FROM squid AS processor
-RUN npx squid-typeorm-migration apply  # Применение миграций
-CMD ["npm", "run", "processor:start"]  # Запуск процессора
+#RUN npx squid-typeorm-migration apply  # Применение миграций
+CMD ["make", "process"]  # Запуск процессора
 
 # Выполнение миграций для query-node
 FROM squid AS query-node
-RUN npx squid-typeorm-migration apply  # Применение миграций
-CMD ["npm", "run", "query-node:start"]  # Запуск GraphQL сервера
+#RUN npx squid-typeorm-migration apply  # Применение миграций
+CMD ["make", "process"]  # Запуск GraphQL сервера
