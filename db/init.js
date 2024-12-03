@@ -8,11 +8,11 @@ const ormconfig = {
   migrationsRun: true,
   dropSchema: true,
   logging: ["query", "error", "schema"],
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT),
-  database: process.env.DB_NAME,
-  username: process.env.DB_USER,
-  password: process.env.DB_PASS,
+  host: "dpg-ct6bvabv2p9s739aq600-a.oregon-postgres.render.com",
+  port: 5432,
+  database: "postgress_4sgg",
+  username: "postgress",
+  password: "YzHGemWnJKdIN53Lnxv6aPsW63TriqrG",
   ssl: { rejectUnauthorized: false },
 };
 
