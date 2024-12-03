@@ -1,5 +1,5 @@
 require('dotenv/config');
-const DataSource = require('typeorm');
+const { DataSource } = require('typeorm');
 
 const ormconfig = {
   type: 'postgres',
@@ -17,23 +17,30 @@ const ormconfig = {
   ssl: { rejectUnauthorized: false },
 };
 
+console.log('ormconfig host: ', ormconfig.host);
+
 const dataSource = new DataSource(ormconfig);
 
 dataSource.initialize()
   .then(async con => {
     try {
+      console.log('Database connection established');
       // Create schemas
       await con.query(`CREATE SCHEMA IF NOT EXISTS archive`);
       await con.query(`CREATE SCHEMA IF NOT EXISTS indexer`);
       await con.runMigrations({ transaction: 'all' });
     } finally {
-      await con.destroy().catch(err => null);  // Используем destroy вместо close
+      await con.destroy().catch(err => console.error('Error closing connection:', err));  // Используем destroy вместо close
     }
   })
   .then(
-    () => process.exit(),
+    () => {
+      console.log('Initialization complete');
+      process.exit();
+    },
     err => {
-      console.error(err, 'ormconfig host: ', ormconfig.host);
+      console.error('Error occurred during database initialization:', err);
+      console.error('ormconfig host: ', ormconfig.host);
       process.exit(1);
     }
   );
