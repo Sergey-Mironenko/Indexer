@@ -8,7 +8,7 @@ const ormconfig = {
   migrationsRun: false,
   dropSchema: false,
   logging: ["query", "error", "schema"],
-  host: process.env.DB_HOST || 'localhost',
+  host: process.env.DB_HOST || 'dpg-ct6bvabv2p9s739aq600-a.oregon-postgres.render.com',
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 5432,
   database: process.env.DB_NAME || 'postgres',
   username: process.env.DB_USER || 'postgres',
