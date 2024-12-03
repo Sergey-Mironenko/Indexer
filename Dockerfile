@@ -32,6 +32,8 @@ ENV PROCESSOR_PROMETHEUS_PORT 3000
 EXPOSE 3000
 EXPOSE 4000
 
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+
 # Выполнение миграций для processor
 FROM squid AS processor
 #RUN npx squid-typeorm-migration apply  # Применение миграций

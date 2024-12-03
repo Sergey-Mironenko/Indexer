@@ -13,12 +13,15 @@ services:
       "-e", "wss://kusama-rpc.dwellir.com",
       "--out", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=archive&ssl=true"
     ]
+    environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"  # Добавляем отключение проверки SSL-сертификатов
 
   gateway:
     image: subsquid/substrate-gateway:firesquid
     environment:
       DATABASE_MAX_CONNECTIONS: 5
       RUST_LOG: "actix_web=info,actix_server=info"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"  # Добавляем отключение проверки SSL-сертификатов
     command: [
       "--database-url", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=archive&ssl=true"
     ]
@@ -35,6 +38,7 @@ services:
       DB_USER: "${DB_USER}"
       DB_PASS: "${DB_PASS}"
       DB_SCHEMA: "archive"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"  # Добавляем отключение проверки SSL-сертификатов
     ports:
       - "4444:3000"
 
@@ -52,6 +56,7 @@ services:
       BLOCK_HEIGHT: 0
       WS_PROVIDER_ENDPOINT_URI: wss://kusama-rpc.polkadot.io
       DB_SCHEMA: "indexer"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"  # Добавляем отключение проверки SSL-сертификатов
     command: >
       sh -c "yarn db:bootstrap && yarn start:prod"
 
@@ -67,6 +72,7 @@ services:
       DB_PORT: ${DB_PORT}
       DB_SCHEMA: "indexer"
       HYDRA_INDEXER_STATUS_SERVICE: http://indexer-status-service:8081/status
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"  # Добавляем отключение проверки SSL-сертификатов
     ports:
       - "8080:8080"
 
@@ -76,3 +82,4 @@ services:
     environment:
       REDIS_URI: ${REDIS_URI}
       PORT: 8081
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"  # Добавляем отключение проверки SSL-сертификатов

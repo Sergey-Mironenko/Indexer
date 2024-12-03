@@ -4,7 +4,7 @@ const ormconfig = {
   type: 'postgres',
   entities: [],
   migrations: ['./migrations/*.js'],
-  synchronize: false,
+  synchronize: true,
   migrationsRun: true,
   dropSchema: false,
   logging: ["query", "error", "schema"],
