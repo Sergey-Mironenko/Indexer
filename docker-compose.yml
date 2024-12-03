@@ -11,10 +11,8 @@ services:
     command: [
       "-e", "wss://kusama-rpc.polkadot.io",
       "-e", "wss://kusama-rpc.dwellir.com",
-      "--out", "postgres://postgress:YzHGemWnJKdIN53Lnxv6aPsW63TriqrG@dpg-ct6bvabv2p9s739aq600-a.oregon-postgres.render.com:5432/postgress_4sgg?schema=archive&ssl=true"
+      "--out", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=archive&ssl=true"
     ]
-    depends_on:
-      - redis
 
   gateway:
     image: subsquid/substrate-gateway:firesquid
@@ -22,71 +20,59 @@ services:
       DATABASE_MAX_CONNECTIONS: 5
       RUST_LOG: "actix_web=info,actix_server=info"
     command: [
-      "--database-url", "postgres://postgress:YzHGemWnJKdIN53Lnxv6aPsW63TriqrG@dpg-ct6bvabv2p9s739aq600-a.oregon-postgres.render.com:5432/postgress_4sgg?schema=archive&ssl=true"
+      "--database-url", "postgres://postgress:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=archive&ssl=true"
     ]
     ports:
       - "8888:8000"
-    depends_on:
-      - ingest
 
   explorer:
     image: subsquid/substrate-explorer:firesquid
     environment:
       DB_TYPE: postgres
-      DB_HOST: dpg-ct6bvabv2p9s739aq600-a.oregon-postgres.render.com
-      DB_PORT: "5432"
-      DB_NAME: "postgress_4sgg"
-      DB_USER: "postgress"
-      DB_PASS: "YzHGemWnJKdIN53Lnxv6aPsW63TriqrG"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: "${DB_PORT}"
+      DB_NAME: "${DB_NAME}"
+      DB_USER: "${DB_USER}"
+      DB_PASS: "${DB_PASS}"
       DB_SCHEMA: "archive"
     ports:
       - "4444:3000"
-    depends_on:
-      - gateway
 
   indexer:
     image: subsquid/hydra-indexer:4
     restart: unless-stopped
     environment:
       INDEXER_WORKERS: 5
-      DB_NAME: postgress_4sgg
-      DB_HOST: dpg-ct6bvabv2p9s739aq600-a.oregon-postgres.render.com
-      DB_USER: postgress
-      DB_PASS: YzHGemWnJKdIN53Lnxv6aPsW63TriqrG
-      DB_PORT: 5432
-      REDIS_URI: redis://redis:6379/0
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_PORT: ${DB_PORT}
+      REDIS_URI: ${REDIS_URI}
       BLOCK_HEIGHT: 0
       WS_PROVIDER_ENDPOINT_URI: wss://kusama-rpc.polkadot.io
       DB_SCHEMA: "indexer"
     command: >
       sh -c "yarn db:bootstrap && yarn start:prod"
-    depends_on:
-      - redis
-      - gateway
 
   indexer-gateway:
     image: subsquid/hydra-indexer-gateway:4
     restart: unless-stopped
     environment:
       DEV_MODE: true
-      DB_NAME: postgress_4sgg
-      DB_HOST: dpg-ct6bvabv2p9s739aq600-a.oregon-postgres.render.com
-      DB_USER: postgress
-      DB_PASS: YzHGemWnJKdIN53Lnxv6aPsW63TriqrG
-      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_PORT: ${DB_PORT}
       DB_SCHEMA: "indexer"
       HYDRA_INDEXER_STATUS_SERVICE: http://indexer-status-service:8081/status
     ports:
       - "8080:8080"
-    depends_on:
-      - indexer
 
   indexer-status-service:
     image: subsquid/hydra-indexer-status-service:4
     restart: unless-stopped
     environment:
-      REDIS_URI: redis://redis:6379/0
+      REDIS_URI: ${REDIS_URI}
       PORT: 8081
-    depends_on:
-      - redis
-      - indexer

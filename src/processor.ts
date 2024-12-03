@@ -14,7 +14,7 @@ processor.setTypesBundle('kusama');
 processor.setBlockRange({ from: STARTING_BLOCK, to: ENDING_BLOCK });
 
 const archiveUrl = lookupArchive("kusama", { release: "FireSquid" });
-console.error("Archive URL:", archiveUrl);
+console.log("Archive URL:", archiveUrl);
 
 processor.setDataSource({
     archive: `${archiveUrl}?ssl=true`,

@@ -1,46 +1,34 @@
 require('dotenv/config');
-const { DataSource } = require('typeorm');
 
 const ormconfig = {
   type: 'postgres',
   entities: [],
   migrations: [__dirname + '/migrations/*.js'],
-  synchronize: true,
-  migrationsRun: true,
-  dropSchema: true,
+  synchronize: false,
+  migrationsRun: false,
+  dropSchema: false,
   logging: ["query", "error", "schema"],
-  host: "dpg-ct6bvabv2p9s739aq600-a.oregon-postgres.render.com",
-  port: 5432,
-  database: "postgress_4sgg",
-  username: "postgress",
-  password: "YzHGemWnJKdIN53Lnxv6aPsW63TriqrG",
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT),
+  database: process.env.DB_NAME,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASS,
   ssl: { rejectUnauthorized: false },
 };
 
-console.log('ormconfig host: ', ormconfig.host);
-
-const dataSource = new DataSource(ormconfig);
-
-dataSource.initialize()
-  .then(async con => {
-    try {
-      console.log('Database connection established');
-      // Create schemas
-      await con.query(`CREATE SCHEMA IF NOT EXISTS archive`);
-      await con.query(`CREATE SCHEMA IF NOT EXISTS indexer`);
-      await con.runMigrations({ transaction: 'all' });
-    } finally {
-      await con.destroy().catch(err => console.error('Error closing connection:', err));  // Используем destroy вместо close
-    }
-  })
-  .then(
-    () => {
-      console.log('Initialization complete');
-      process.exit();
-    },
-    err => {
-      console.error('Error occurred during database initialization:', err);
-      console.error('ormconfig host: ', ormconfig.host);
-      process.exit(1);
-    }
-  );
+require('typeorm').createConnection(ormconfig).then(async con => {
+  try {
+    // Create schemas
+    await con.query(`CREATE SCHEMA IF NOT EXISTS archive`);
+    await con.query(`CREATE SCHEMA IF NOT EXISTS indexer`);
+    await con.runMigrations({ transaction: 'all' });
+  } finally {
+    await con.close().catch(err => null);
+  }
+}).then(
+  () => process.exit(),
+  err => {
+    console.error(err);
+    process.exit(1);
+  }
+);
