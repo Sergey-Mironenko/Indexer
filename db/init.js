@@ -33,7 +33,7 @@ dataSource.initialize()
   .then(
     () => process.exit(),
     err => {
-      console.error(err, 'ormkonfig host: ', ormconfig.host);
+      console.error(err, 'ormconfig host: ', ormconfig.host);
       process.exit(1);
     }
   );
