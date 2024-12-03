@@ -17,7 +17,7 @@ const archiveUrl = lookupArchive("kusama", { release: "FireSquid" });
 console.log("Archive URL:", archiveUrl);
 
 processor.setDataSource({
-    archive: `${archiveUrl}?ssl=true`,
+    archive: 'https://kusama.archive.subsquid.io/graphql?ssl=true',
     chain: 'wss://kusama-rpc.polkadot.io',
 });
 

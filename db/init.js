@@ -3,7 +3,7 @@ require('dotenv/config');
 const ormconfig = {
   type: 'postgres',
   entities: [],
-  migrations: ['./migrations/*.js'],
+  migrations: [__dirname + '/migrations/*.js'],
   synchronize: true,
   migrationsRun: true,
   dropSchema: false,
