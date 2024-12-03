@@ -1,4 +1,5 @@
 require('dotenv/config');
+const DataSource = require('typeorm');
 
 const ormconfig = {
   type: 'postgres',
@@ -16,19 +17,23 @@ const ormconfig = {
   ssl: { rejectUnauthorized: false },
 };
 
-require('typeorm').createConnection(ormconfig).then(async con => {
-  try {
-    // Create schemas
-    await con.query(`CREATE SCHEMA IF NOT EXISTS archive`);
-    await con.query(`CREATE SCHEMA IF NOT EXISTS indexer`);
-    await con.runMigrations({ transaction: 'all' });
-  } finally {
-    await con.close().catch(err => null);
-  }
-}).then(
-  () => process.exit(),
-  err => {
-    console.error(err);
-    process.exit(1);
-  }
-);
+const dataSource = new DataSource(ormconfig);
+
+dataSource.initialize()
+  .then(async con => {
+    try {
+      // Create schemas
+      await con.query(`CREATE SCHEMA IF NOT EXISTS archive`);
+      await con.query(`CREATE SCHEMA IF NOT EXISTS indexer`);
+      await con.runMigrations({ transaction: 'all' });
+    } finally {
+      await con.destroy().catch(err => null);  // Используем destroy вместо close
+    }
+  })
+  .then(
+    () => process.exit(),
+    err => {
+      console.error(err);
+      process.exit(1);
+    }
+  );
