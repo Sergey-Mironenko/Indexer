@@ -13,7 +13,7 @@ const ormconfig = {
   database: process.env.DB_NAME || 'postgres',
   username: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASS || 'postgres',
-  //ssl: { rejectUnauthorized: false },
+  ssl: { rejectUnauthorized: false },
 };
 
 require('typeorm').createConnection(ormconfig).then(async con => {

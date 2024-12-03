@@ -13,11 +13,11 @@ processor.setTypesBundle('kusama');
 // processor.setBlockRange({ from: 5756453 });
 processor.setBlockRange({ from: STARTING_BLOCK, to: ENDING_BLOCK });
 
-//const archiveUrl = lookupArchive("kusama", { release: "FireSquid" });
-//console.log("Archive URL:", archiveUrl);
+const archiveUrl = lookupArchive("kusama", { release: "FireSquid" });
+console.log("Archive URL:", archiveUrl);
 
 processor.setDataSource({
-    archive: lookupArchive("kusama", { release: "FireSquid" }),
+    archive: `${archiveUrl}?ssl=true`,
     chain: 'wss://kusama-rpc.polkadot.io',
 });
 
