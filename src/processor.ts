@@ -1,7 +1,8 @@
-import fetch from 'node-fetch';
 import { SubstrateProcessor } from '@subsquid/substrate-processor';
 import { FullTypeormDatabase as Database } from '@subsquid/typeorm-store';
 import * as mappings from './mappings';
+
+const fetch = require('node-fetch-commonjs');
 
 async function validateArchiveUrl(url: any) {
     try {
