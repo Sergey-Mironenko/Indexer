@@ -3,6 +3,8 @@ import { SubstrateProcessor } from '@subsquid/substrate-processor'
 import { FullTypeormDatabase as Database } from '@subsquid/typeorm-store'
 import * as mappings from './mappings'
 
+require('./fetch-patch');
+
 const processor = new SubstrateProcessor(new Database())
 
 const STARTING_BLOCK_V1 = 5_756_453;
