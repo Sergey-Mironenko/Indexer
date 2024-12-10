@@ -3,7 +3,14 @@ import { SubstrateProcessor } from '@subsquid/substrate-processor'
 import { FullTypeormDatabase as Database } from '@subsquid/typeorm-store'
 import * as mappings from './mappings'
 
-import './fetch-patch';
+//import './fetch-patch';
+
+import https from 'https'
+import http from 'http'
+
+// Настройте глобальный агент
+https.globalAgent = new https.Agent({ keepAlive: true });
+http.globalAgent = new https.Agent({ keepAlive: true });
 
 const processor = new SubstrateProcessor(new Database())
 
