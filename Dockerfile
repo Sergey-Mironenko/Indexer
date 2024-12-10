@@ -8,6 +8,7 @@ WORKDIR /squid
 ADD package.json .
 ADD package-lock.json .
 RUN npm ci
+RUN npx patch-package
 ADD tsconfig.json .
 ADD src src
 RUN npm run build
@@ -17,6 +18,7 @@ WORKDIR /squid
 ADD package.json .
 ADD package-lock.json .
 RUN npm ci --production
+RUN npx patch-package
 
 FROM node AS squid
 WORKDIR /squid
