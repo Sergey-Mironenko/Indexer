@@ -1,0 +1,24 @@
+diff --git a/node_modules/node-fetch/src/index.js b/node_modules/node-fetch/src/index.js
+index 7c4aee8..cab39d3 100644
+--- a/node_modules/node-fetch/src/index.js
++++ b/node_modules/node-fetch/src/index.js
+@@ -62,7 +62,18 @@ export default async function fetch(url, options_) {
+ 		}
+ 
+ 		// Wrap http.request into fetch
+-		const send = (parsedURL.protocol === 'https:' ? https : http).request;
++
++		//Изменение
++		//const send = (parsedURL.protocol === 'https:' ? https : http).request;
++		const send = (() => {
++			if (parsedURL.protocol === 'http:') {
++				throw new TypeError(`Protocol "http:" not supported. Expected "https:"`);
++			}
++			if (parsedURL.protocol === 'https:') {
++				return https.request;
++			}
++			throw new TypeError(`Unsupported protocol: "${parsedURL.protocol}"`);
++		})();
+ 		const {signal} = request;
+ 		let response = null;
+ 

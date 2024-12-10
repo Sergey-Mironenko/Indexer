@@ -10,7 +10,8 @@
     "db:migrate": "npx squid-typeorm-migration apply",
     "processor:start": "node lib/processor.js",
     "query-node:start": "squid-graphql-server --subscriptions --max-root-fields 50 --dumb-cache in-memory --dumb-cache-ttl 1000 --dumb-cache-size 100 --dumb-cache-max-age 1000",
-    "start": "make migrate && make process"
+    "start": "make migrate && make process",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@kodadot1/metasquid": "^0.1.6-rc.0",
@@ -29,6 +30,7 @@
     "md5": "^2.3.0",
     "nanoid": "3.3.4",
     "node-fetch": "^3.3.2",
+    "patch-package": "^8.0.0",
     "pg": "^8.10.0",
     "type-graphql": "^1.2.0-rc.1",
     "typeorm": "0.3.15",
