@@ -11,6 +11,7 @@
     "processor:start": "node lib/processor.js",
     "query-node:start": "squid-graphql-server --subscriptions --max-root-fields 50 --dumb-cache in-memory --dumb-cache-ttl 1000 --dumb-cache-size 100 --dumb-cache-max-age 1000",
     "start": "make migrate && make process",
+    "preinstall": "patch-package",
     "postinstall": "patch-package"
   },
   "dependencies": {
