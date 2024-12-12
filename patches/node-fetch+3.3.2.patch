@@ -12,7 +12,7 @@ index 7c4aee8..468b878 100644
 +		//const send = (parsedURL.protocol === 'https:' ? https : http).request;
 +		/*const send = (() => {
 +			if (parsedURL.protocol === 'http:') {
-+				return http.request;
++				return https.request;
 +			}
 +			if (parsedURL.protocol === 'https:') {
 +				return https.request;
